@@ -345,20 +345,31 @@ class CodeGen {
   genGetPropDispatch(cls) {
     const clsName = this.toClassName(cls.name);
     const props = cls.props || cls.properties || [];
+    let clsused = 0;
 
     let result = props.map((iter, index) => {
       let getProp = '';
       if (index) {
-        getProp = `\n  } else if (tk_str_ieq("${iter.name}", name)) {\n`
+        getProp = `\n	} else if (tk_str_ieq("${iter.name}", name)) {\n`
       } else {
-        getProp = `  if (tk_str_ieq("${iter.name}", name)) {\n`
+        getProp = `	if (tk_str_ieq("${iter.name}", name)) {\n`
       }
-      getProp += `     ${this.genGetProp(cls, iter)}\n`;
-      getProp += '     return RET_OK;';
+      getProp += `		${this.genGetProp(cls, iter)}\n`;
+      getProp += '		return RET_OK;';
+      if (this.hasGetterFor(cls, iter.name) || this.isReadable(iter)) {
+        clsused = 1;
+      }
       return getProp;
     }).join('');
 
-    result += '\n  }';
+    if (result !== "") {
+	    result += '\n	}';
+    }
+
+    if (clsused === 0) {
+      const objName = this.toObjName(cls.name);
+      result += `\n\t(void)${objName};`
+    }
 
     return result;
   }
@@ -395,19 +406,30 @@ class CodeGen {
   genSetPropDispatch(cls) {
     const clsName = this.toClassName(cls.name);
     const props = cls.props || cls.properties || [];
+    let clsused = 0;
     let result = props.map((iter, index) => {
       let setProp = '';
       if (index) {
-        setProp = `\n  } else if (tk_str_ieq("${iter.name}", name)) {\n`
+        setProp = `\n	} else if (tk_str_ieq("${iter.name}", name)) {\n`
       } else {
-        setProp = `  if (tk_str_ieq("${iter.name}", name)) {\n`
+        setProp = `	if (tk_str_ieq("${iter.name}", name)) {\n`
       }
-      setProp += `     ${this.genSetProp(cls, iter)}\n`;
-      setProp += '     return RET_OK;';
+      setProp += `		${this.genSetProp(cls, iter)}\n`;
+      setProp += '		return RET_OK;';
+      if (this.hasSetterFor(cls, iter.name) || this.isWritable(iter)) {
+        clsused = 1;
+      }
       return setProp;
     }).join('');
 
-    result += '\n  }';
+    if (result !== "") {
+	    result += '\n	}';
+    }
+
+    if (clsused === 0) {
+      const objName = this.toObjName(cls.name);
+      result += `\n\t(void)${objName};`
+    }
 
     return result;
   }
@@ -449,14 +471,15 @@ class CodeGen {
     const objName = this.toObjName(cls.name);
     const vmClsName = this.toViewModelClassName(cls.name);
     const vmClsType = this.toViewModelClassType(cls.name);
+    let clsused = 0;
 
     let commands = cls.commands || cls.methods || [];
     commands = commands.filter(iter => this.isCommand(iter));
 
     if (commands.length > 0) {
       let result = ` 
-  ${vmClsType}* vm = (${vmClsType}*)(obj);
-  ${clsType}* ${objName} = vm->${objName};
+	${vmClsType}* vm = (${vmClsType}*)(obj);
+	${clsType}* ${objName} = vm->${objName};
 `;
 
       result += commands.map((iter, index) => {
@@ -467,15 +490,24 @@ class CodeGen {
         }
 
         if (index) {
-          exec = `\n  } else if (tk_str_ieq("${cmdName}", name)) {\n`
+          exec = `\n	} else if (tk_str_ieq("${cmdName}", name)) {\n`
         } else {
-          exec = `  if (tk_str_ieq("${cmdName}", name)) {\n`
+          exec = `	if (tk_str_ieq("${cmdName}", name)) {\n`
         }
-        exec += `    return ${this.genCanExec(cls, iter)}\n`;
+        exec += `		return ${this.genCanExec(cls, iter)}\n`;
+        if (this.genCanExec(cls, iter) !== 'TRUE;') {
+          clsused = 1;
+        }
+
         return exec;
       }).join('');
 
-      result += '  }';
+      result += '	}';
+
+      if (clsused === 0) {
+        const objName = this.toObjName(cls.name);
+        result += `\n\t(void)${objName};`
+      }
 
       return result;
     } else {
@@ -534,8 +566,8 @@ class CodeGen {
 
     if (commands.length > 0) {
       let result = ` 
-  ${vmClsType}* vm = (${vmClsType}*)(obj);
-  ${clsType}* ${objName} = vm->${objName};
+	${vmClsType}* vm = (${vmClsType}*)(obj);
+	${clsType}* ${objName} = vm->${objName};
 `;
       result += commands.map((iter, index) => {
         let exec = '';
@@ -546,15 +578,15 @@ class CodeGen {
         }
 
         if (index) {
-          exec = `\n  } else if (tk_str_ieq("${cmdName}", name)) {\n`
+          exec = `\n	} else if (tk_str_ieq("${cmdName}", name)) {\n`
         } else {
-          exec = `  if (tk_str_ieq("${cmdName}", name)) {\n`
+          exec = `	if (tk_str_ieq("${cmdName}", name)) {\n`
         }
-        exec += `    return ${this.genExec(cls, iter)}\n`;
+        exec += `		return ${this.genExec(cls, iter)}\n`;
         return exec;
       }).join('');
 
-      result += '  }';
+      result += '	}';
 
       return result;
     } else {

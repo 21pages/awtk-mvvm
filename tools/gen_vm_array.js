@@ -35,11 +35,11 @@ BEGIN_C_DECLS
  *
  */
 typedef struct _${vmClsType} {
-  view_model_array_t view_model_array;
+	view_model_array_t view_model_array;
 
-  /*model object*/
-  ${clsType}* ${objName};
-  view_model_t* ${vmElmName};
+	/*model object*/
+	${clsType}* ${objName};
+	view_model_t* ${vmElmName};
 } ${vmClsType};
 
 /**
@@ -106,120 +106,120 @@ END_C_DECLS
 #include "${vmClsName}.h"
 
 view_model_t* ${vmClsName}_attach(object_t* obj, uint32_t index) {
-  view_model_t* vm = VIEW_MODEL(obj);
-  ${vmClsType}* ${vmClsName} = (${vmClsType}*)(vm);
-  ${elmClsType}* ${elmClsName} = ${getItem};
-  view_model_t* ${vmElmName} = ${vmClsName}->${vmElmName};
+	view_model_t* vm = VIEW_MODEL(obj);
+	${vmClsType}* ${vmClsName} = (${vmClsType}*)(vm);
+	${elmClsType}* ${elmClsName} = ${getItem};
+	view_model_t* ${vmElmName} = ${vmClsName}->${vmElmName};
 
-  ${vmElmName}_attach(${vmElmName}, ${elmClsName});
+	${vmElmName}_attach(${vmElmName}, ${elmClsName});
 
-  return VIEW_MODEL(${vmElmName});
+	return VIEW_MODEL(${vmElmName});
 }
 
 static ret_t ${vmClsName}_set_prop(object_t* obj, const char* name, const value_t* v) {
-  uint32_t index = 0;
-  view_model_t* view_model = VIEW_MODEL(obj);
-  ${clsType}* ${objName} = ((${vmClsType}*)(obj))->${objName};
-  
-  if(view_model_array_default_set_prop(view_model, name, v) == RET_OK) {
-    return RET_OK;
-  }
+	uint32_t index = 0;
+	view_model_t* view_model = VIEW_MODEL(obj);
+	${clsType}* ${objName} = ((${vmClsType}*)(obj))->${objName};
+
+	if(view_model_array_default_set_prop(view_model, name, v) == RET_OK) {
+		return RET_OK;
+	}
 
 ${setPropsDispatch}
 
-  name = destruct_array_prop_name(name, &index);
-  view_model = ${vmClsName}_attach(obj, index);
+	name = destruct_array_prop_name(name, &index);
+	view_model = ${vmClsName}_attach(obj, index);
 
-  return view_model_set_prop(view_model, name, v);
+	return view_model_set_prop(view_model, name, v);
 }
 
 static ret_t ${vmClsName}_get_prop(object_t* obj, const char* name, value_t* v) {
-  uint32_t index = 0;
-  view_model_t* view_model = VIEW_MODEL(obj);
-  ${clsType}* ${objName} = ((${vmClsType}*)(obj))->${objName};
-  
-  if(view_model_array_default_get_prop(view_model, name, v) == RET_OK) {
-    return RET_OK;
-  }
+	uint32_t index = 0;
+	view_model_t* view_model = VIEW_MODEL(obj);
+	${clsType}* ${objName} = ((${vmClsType}*)(obj))->${objName};
+
+	if(view_model_array_default_get_prop(view_model, name, v) == RET_OK) {
+		return RET_OK;
+	}
 
 ${getPropsDispatch}
 
-  name = destruct_array_prop_name(name, &index);
-  view_model = ${vmClsName}_attach(obj, index);
+	name = destruct_array_prop_name(name, &index);
+	view_model = ${vmClsName}_attach(obj, index);
 
-  return view_model_get_prop(view_model, name, v);
+	return view_model_get_prop(view_model, name, v);
 }
 
 
 static bool_t ${vmClsName}_can_exec(object_t* obj, const char* name, const char* args) {
-  uint32_t index = tk_atoi(args);
-  view_model_t* view_model = VIEW_MODEL(obj);
+	uint32_t index = tk_atoi(args);
+	view_model_t* view_model = VIEW_MODEL(obj);
 
 ${canExecDispatch}
   
-  view_model = ${vmClsName}_attach(obj, index);
+	view_model = ${vmClsName}_attach(obj, index);
 
-  return view_model_can_exec(view_model, name, NULL);
+	return view_model_can_exec(view_model, name, NULL);
 }
 
 static ret_t ${vmClsName}_exec(object_t* obj, const char* name, const char* args) {
-  uint32_t index = tk_atoi(args);
-  view_model_t* view_model = VIEW_MODEL(obj);
+	uint32_t index = tk_atoi(args);
+	view_model_t* view_model = VIEW_MODEL(obj);
 
 ${execDispatch}
 
-  view_model = ${vmClsName}_attach(obj, index);
+	view_model = ${vmClsName}_attach(obj, index);
 
-  return view_model_exec(view_model, name, NULL);
+	return view_model_exec(view_model, name, NULL);
 }
 
 static ret_t ${vmClsName}_on_destroy(object_t* obj) {
-  ${vmClsType}* vm = (${vmClsType}*)(obj);
-  return_value_if_fail(vm != NULL, RET_BAD_PARAMS);
+	${vmClsType}* vm = (${vmClsType}*)(obj);
+	return_value_if_fail(vm != NULL, RET_BAD_PARAMS);
 
-  ${offEvents}
-  ${vmElmName}_attach(vm->${vmElmName}, NULL);
-  OBJECT_UNREF(vm->${vmElmName});
-  ${destructor}(vm->${objName});
+	${offEvents}
+	${vmElmName}_attach(vm->${vmElmName}, NULL);
+	OBJECT_UNREF(vm->${vmElmName});
+	${destructor}(vm->${objName});
 
-  return view_model_array_deinit(VIEW_MODEL(obj));
+	return view_model_array_deinit(VIEW_MODEL(obj));
 }
 
 static const object_vtable_t s_${vmClsName}_vtable = {
-  "${vmClsType}",
-  "${vmClsType}",
-  sizeof(${vmClsType}),
-  TRUE,
-  ${vmClsName}_on_destroy,
-  NULL,
-  ${vmClsName}_get_prop,
-  ${vmClsName}_set_prop,
-  NULL,
-  NULL,
-  ${vmClsName}_can_exec,
-  ${vmClsName}_exec
+	"${vmClsType}",
+	"${vmClsType}",
+	sizeof(${vmClsType}),
+	TRUE,
+	${vmClsName}_on_destroy,
+	NULL,
+	${vmClsName}_get_prop,
+	${vmClsName}_set_prop,
+	NULL,
+	NULL,
+	${vmClsName}_can_exec,
+	${vmClsName}_exec
 };
 
 view_model_t* ${vmClsName}_create_with(${clsType}* ${objName}) {
-  object_t* obj = object_create(&s_${vmClsName}_vtable);
-  view_model_t* vm = view_model_array_init(VIEW_MODEL(obj));
-  ${vmClsType}* ${vmClsName} = (${vmClsType}*)(vm);
-  
-  ${vmClsName}->${vmElmName} = ${vmElmName}_create_with(NULL);
-  return_value_if_fail(vm != NULL, NULL);
+	object_t* obj = object_create(&s_${vmClsName}_vtable);
+	view_model_t* vm = view_model_array_init(VIEW_MODEL(obj));
+	${vmClsType}* ${vmClsName} = (${vmClsType}*)(vm);
 
-  ${vmClsName}->${objName} = ${objName};
-  ENSURE(${vmClsName}->${objName} != NULL);
-  ${forwardEvents}
+	${vmClsName}->${vmElmName} = ${vmElmName}_create_with(NULL);
+	return_value_if_fail(vm != NULL, NULL);
 
-  return vm;
+	${vmClsName}->${objName} = ${objName};
+	ENSURE(${vmClsName}->${objName} != NULL);
+	${forwardEvents}
+
+	return vm;
 }
 
 view_model_t* ${vmClsName}_create(navigator_request_t* req) {
-  ${clsType}* ${objName} = ${constructor};
-  return_value_if_fail(${objName} != NULL, NULL);
+	${clsType}* ${objName} = ${constructor};
+	return_value_if_fail(${objName} != NULL, NULL);
 
-  return ${vmClsName}_create_with(${objName});
+	return ${vmClsName}_create_with(${objName});
 }
 `;
 

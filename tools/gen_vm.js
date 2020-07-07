@@ -30,10 +30,10 @@ BEGIN_C_DECLS
  *
  */
 typedef struct _${vmClsType} {
-  view_model_t view_model;
+	view_model_t view_model;
 
-  /*model object*/
-  ${clsType}* ${objName};
+	/*model object*/
+	${clsType}* ${objName};
 } ${vmClsType};
 
 /**
@@ -103,85 +103,85 @@ END_C_DECLS
 #include "${vmClsName}.h"
 
 static ret_t ${vmClsName}_set_prop(object_t* obj, const char* name, const value_t* v) {
-  ${clsType}* ${objName} = ((${vmClsType}*)(obj))->${objName};
+	${clsType}* ${objName} = ((${vmClsType}*)(obj))->${objName};
 
 ${setPropsDispatch}
   
-  return RET_NOT_FOUND;
+	return RET_NOT_FOUND;
 }
 
 
 static ret_t ${vmClsName}_get_prop(object_t* obj, const char* name, value_t* v) {
-  ${clsType}* ${objName} = ((${vmClsType}*)(obj))->${objName};
+	${clsType}* ${objName} = ((${vmClsType}*)(obj))->${objName};
 
 ${getPropsDispatch}
 
-  return RET_NOT_FOUND;
+	return RET_NOT_FOUND;
 }
 
 
 static bool_t ${vmClsName}_can_exec(object_t* obj, const char* name, const char* args) {
 ${canExecDispatch}
-  return FALSE;
+	return FALSE;
 }
 
 static ret_t ${vmClsName}_exec(object_t* obj, const char* name, const char* args) {
 ${execDispatch}
-  return RET_NOT_FOUND;
+	return RET_NOT_FOUND;
 }
 
 static ret_t ${vmClsName}_on_destroy(object_t* obj) {
-  ${vmClsType}* vm = (${vmClsType}*)(obj);
-  return_value_if_fail(vm != NULL, RET_BAD_PARAMS);
+	${vmClsType}* vm = (${vmClsType}*)(obj);
+	return_value_if_fail(vm != NULL, RET_BAD_PARAMS);
 
-  ${offEvents}
-  ${destructor}(vm->${objName});
+	${offEvents}
+	${destructor}(vm->${objName});
 
-  return view_model_deinit(VIEW_MODEL(obj));
+	return view_model_deinit(VIEW_MODEL(obj));
 }
 
 static const object_vtable_t s_${vmClsName}_vtable = {
-  "${vmClsType}",
-  "${vmClsType}",
-  sizeof(${vmClsType}),
-  FALSE,
-  ${vmClsName}_on_destroy,
-  NULL,
-  ${vmClsName}_get_prop,
-  ${vmClsName}_set_prop,
-  NULL,
-  NULL,
-  ${vmClsName}_can_exec,
-  ${vmClsName}_exec
+	"${vmClsType}",
+	"${vmClsType}",
+	sizeof(${vmClsType}),
+	FALSE,
+	${vmClsName}_on_destroy,
+	NULL,
+	${vmClsName}_get_prop,
+	${vmClsName}_set_prop,
+	NULL,
+	NULL,
+	${vmClsName}_can_exec,
+	${vmClsName}_exec
 };
 
 view_model_t* ${vmClsName}_create_with(${clsType}* ${objName}) {
-  object_t* obj = object_create(&s_${vmClsName}_vtable);
-  view_model_t* vm = view_model_init(VIEW_MODEL(obj));
-  ${vmClsType}* ${vmClsName} = (${vmClsType}*)(vm);
+	object_t* obj = object_create(&s_${vmClsName}_vtable);
+	view_model_t* vm = view_model_init(VIEW_MODEL(obj));
+	${vmClsType}* ${vmClsName} = (${vmClsType}*)(vm);
 
-  return_value_if_fail(vm != NULL, NULL);
+	return_value_if_fail(vm != NULL, NULL);
 
-  ${vmClsName}->${objName} = ${objName};
-  ${forwardEvents}
+	${vmClsName}->${objName} = ${objName};
+	${forwardEvents}
 
-  return vm;
+	return vm;
 }
 
 ret_t ${vmClsName}_attach(view_model_t* vm, ${clsType}* ${objName}) {
-  ${vmClsType}* ${vmClsName} = (${vmClsType}*)(vm);
-  return_value_if_fail(vm != NULL, RET_BAD_PARAMS);
+	${vmClsType}* ${vmClsName} = (${vmClsType}*)(vm);
+	return_value_if_fail(vm != NULL, RET_BAD_PARAMS);
 
-  ${vmClsName}->${objName} = ${objName};
+	${vmClsName}->${objName} = ${objName};
 
-  return RET_OK;
+	return RET_OK;
 }
 
 view_model_t* ${vmClsName}_create(navigator_request_t* req) {
-  ${clsType}* ${objName} = ${constructor};
-  return_value_if_fail(${objName} != NULL, NULL);
+	${clsType}* ${objName} = ${constructor};
+	return_value_if_fail(${objName} != NULL, NULL);
 
-  return ${vmClsName}_create_with(${objName});
+	return ${vmClsName}_create_with(${objName});
 }
 `;
 

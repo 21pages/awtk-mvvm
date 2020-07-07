@@ -174,6 +174,7 @@ navigator_handler_t* navigator_handler_awtk_back_create(void) {
   return handler;
 }
 
+#if 0
 static ret_t tk_on_choose_file_result(void* ctx, event_t* e) {
   navigator_request_t* req = (navigator_request_t*)ctx;
   file_chooser_t* chooser = (file_chooser_t*)(e->target);
@@ -215,6 +216,7 @@ static ret_t navigator_handler_awtk_on_pick_file(navigator_handler_t* handler,
   }
 }
 
+
 navigator_handler_t* navigator_handler_awtk_pick_file_create(void) {
   object_t* obj = NULL;
   navigator_handler_t* handler = NULL;
@@ -250,3 +252,4 @@ navigator_handler_t* navigator_handler_awtk_pick_dir_create(void) {
 
   return handler;
 }
+#endif
